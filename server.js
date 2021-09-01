@@ -43,10 +43,7 @@ app.get("/books", async (req, res) => {
   }
    console.log(user);
   try {
-    const bookList = await Book.find({ email: user.email }, (err, book) => {
-      console.log(book);
-     return book;
-    }); 
+    const bookList = await Book.find({})
     // res.send(book);
     console.log(bookList);
     // res.status(200).send(bookList);
@@ -60,37 +57,11 @@ app.get("/*", (req, res) => {
   res.status(404).send("This is not the route you are looking for!");
 });
 
-//-------------------Functions and Classes--------------
+//-------------------Functions and Classes-----------------
 
-//------------------------Seeding DB------------------------
-async function createBook() {
-  const Book1 = new Book({
-    title: "Little House on the Prarie",
-    description: "The trials and tribulations of a young girl on the prarie",
-    status: "available",
-    email: "littlejohn@aol.com",
-  });
+//------------------------Seeding DB-----------------------
 
-  const Book2 = new Book({
-    title: "Little Women",
-    description: "The trials and tribulations of a young girl",
-    status: "available",
-    email: "littlejohn@aol.com",
-  });
-  const Book3 = new Book({
-    title: "Little Luna",
-    description: "The trials and tribulations of a little dog",
-    status: "available",
-    email: "littlejohn@aol.com",
-  });
-  await Book1.save();
-  await Book2.save();
-  await Book3.save();
-  console.log("books saved");
-  mongoose.disconnect();
-}
-
-createBook();
+// createBook();
 
 //------------------------Listening------------------------
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
