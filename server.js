@@ -46,10 +46,15 @@ app.get("/books", async (req, res) => {
     const bookList = await Book.find({})
     // res.send(book);
     console.log(bookList);
-    // res.status(200).send(bookList);
+    res.status(200).send(bookList);
   } catch (err) {
     console.log(err);
   }
+});
+
+app.post("/books", async ( req, res) => {
+   const newBook = await Book.create(req.body);
+   res.status(201).send(newBook);
 });
 
 // Default route to catch any other routes that may be entered
