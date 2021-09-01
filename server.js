@@ -21,7 +21,7 @@ const { request } = require("express");
 //------------------------Configs--------------------------
 const app = express();
 app.use(cors());
-
+app.use(express.json());
 // Import and config the dotenv
 require("dotenv").config();
 
@@ -46,10 +46,22 @@ app.get("/books", async (req, res) => {
     const bookList = await Book.find({})
     // res.send(book);
     console.log(bookList);
-    // res.status(200).send(bookList);
+    res.status(200).send(bookList);
+    //Server Side Error Checking
   } catch (err) {
     console.log(err);
   }
+});
+
+app.post("/books", async ( req, res) => {
+  console.log(req.body)
+  try{
+   const newBook = await Book.create(req.body);
+   res.status(201).send(newBook);
+  }catch(err) {
+    res.status(401).send(err);
+  }
+
 });
 
 // Default route to catch any other routes that may be entered
