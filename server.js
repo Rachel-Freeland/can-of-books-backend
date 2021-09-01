@@ -47,6 +47,7 @@ app.get("/books", async (req, res) => {
     // res.send(book);
     console.log(bookList);
     res.status(200).send(bookList);
+    //Server Side Error Checking
   } catch (err) {
     console.log(err);
   }
