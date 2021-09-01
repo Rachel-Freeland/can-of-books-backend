@@ -1,10 +1,12 @@
-# Can of Books Backend
+# can-of-books-backend
 
 **Author**: Alex Grazda, Patrick Laurion, Rachel Freeland
 **Version**: 1.0.0 (increment the patch/fix version number if you make more commits past your first submission)
 
 ## Overview
+
 Books are life-changing. They have the power to enlighten, educate, entertain, heal, and help us grow. Build out this code base to create an web app to track what books have impacted you, and what's recommended to read next.
+
 
 ## Getting Started
 <!-- What are the steps that a user must take in order to build this app on their own machine and get it running? -->
@@ -18,6 +20,7 @@ Books are life-changing. They have the power to enlighten, educate, entertain, h
 01-01-2001 4:59pm - Application now has a fully-functional express server, with a GET route for the location resource. -->
 
 ## Estimates
+
 | Time Estimate | Name of Feature | Start Time | Finish Time | Actual Time Needed | Collaborators |
 |:-------------:|:---------------:|------------|-------------|--------------------|---------------|
 |    4hrs       |  Lab 11         |    1:45pm  |  7:00pm     |     5hr 15min      | Joe(TA)       |
@@ -87,3 +90,4 @@ Books are life-changing. They have the power to enlighten, educate, entertain, h
    
 - How will you approach each other and the challenge of building an application knowing that it is impossible for two people to be at the exact same place in understanding and skill level? 
   - You are only as strong as your weakest link. Members will bring that person up to skill level.
+
