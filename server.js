@@ -13,10 +13,15 @@ db.on("error", console.error.bind(console, "connection error: "));
 db.once("open", function () {
   console.log("connected to mongo");
 });
+const jwt = require('jsonwebtoken');
+const jwksClient = require('jwks-rsa');
+
+const client = jwksClient({
+  jwksUri: 'https://dev-qttzuf0f.us.auth0.com/.well-known/jwks.json'
+});
 
 // Import BookSchema
 const Book = require("./BookSchema.js");
-const { request } = require("express");
 
 //------------------------Configs--------------------------
 const app = express();
@@ -28,6 +33,14 @@ require("dotenv").config();
 // Designate the port
 const PORT = process.env.PORT;
 
+// --------- AUTH0 header stuff ---------
+function getKey(header, callback) {
+  client.getSigningKey(header.kid, function (err, key) {
+    var signingKey = key.publicKey || key.rsaPublicKey;
+    callback(null, signingKey);
+  });
+}
+
 //-------------------------Routes--------------------------
 // Set up the primary "root" route
 app.get("/", (req, res) => {
@@ -35,67 +48,72 @@ app.get("/", (req, res) => {
 });
 
 app.get("/books", async (req, res) => {
-  // Frontend request to server-------------------
-  const user = {};
-  //if front end made a request-------------------
-  if (req.query.email) {
-    user.email = req.query.email;
-  }
-  console.log(user);
-  try {
-    const bookList = await Book.find({})
-    // res.send(book);
-    console.log(bookList);
-    res.status(200).send(bookList);
-    //Server Side Error Checking
-  } catch (err) {
-    console.log(err);
-  }
+  const token = req.headers.authorization.split(' ')[1];
+  jwt.verify(token, getKey, {}, function (err, user) {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      // find the books that belong to the user with that email address
+      let userEmail = user.email;
+      Book.find({ email: userEmail }, (err, books) => {
+        console.log(books);
+        res.send(books);
+      });
+    }
+  });
 });
 
-app.post("/books", async (req, res) => {
-  // console.log should see the json object that has the new books title, description, status and email.
-  console.log(req.body)
-  try {
-    const newBook = await Book.create(req.body);
-    res.status(201).send(newBook);
-    // Book.create is making a new Book instance with the json object we sent down in our request from the front end.
-  } catch (err) {
-    // if we dont get what we want, we send oops information.
-    res.status(401).send(err);
-  }
 
+app.post("/books", async (req, res) => {
+  const token = req.headers.authorization.split(' ')[1];
+  jwt.verify(token, getKey, {}, function (err, user) {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      const newBook = new Book({
+        name: req.body.name,
+        description: req.body.description,
+        status: req.body.status,
+        email: user.email
+      });
+      newBook.save((err, saveBookData) => {
+        res.send(saveBookData);
+      });
+    }
+  });
 });
 
 app.delete("/books/:id", async (req, res) => {
-  // console.log should see the specific book selected in app's personalized ID that it was given upon creation in the DB.
-  console.log(req.params.id)
-  try {
-    await Book.findByIdAndDelete(req.params.id);
-    // We are looking for a book in all of the Book schema objects that were created and finding the specific book's id.  then it is deleted from the database because thats what the findByIdAndDelete method is programed to do.
-    res.status(204).send('book deleted!');
-  } catch (err) {
-        // if we dont get what we want, we send oops information.
-    res.status(404).send(err);
-  }
-
+  const token = req.headers.authorization.split(' ')[1];
+  jwt.verify(token, getKey, {}, function (err, user) {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      let bookId = req.params.id;
+      Book.deleteOne({ _id: bookId, email: user.email })
+        .then(deleteBookData => {
+          console.log(deleteBookData);
+          res.send('deleted the book');
+        });
+    }
+  });
 });
 
 app.put("/books/:id", async (req, res) => {
-   // console.log should see the specific book selected in app's personalized ID that it was given upon creation in the DB.
-  console.log(req.params.id)
-  // we are setting a local(in fuction only) variable called ID, that is given the value of the personalized ID sent from the front end... so that we may use it easier(aka less typing/readability) in our updateBook variable.
-  const id = req.params.id;
-  try {
-    const updateBook = await Book.findByIdAndUpdate(id, req.body, {new: true});
-    // findByIdAndUpdate is taking the unique ID and taking the req.body{like when we make a new book}, then is changing the old version of the book into the new version the user is requesting to make.
-    res.status(204).send(updateBook);
-  } catch (err) {
-    console.log(err);
-        // if we dont get what we want, we send oops information.
-    res.status(404).send(`not able to update book:${req.params.id}`);
-  }
-
+  const token = req.headers.authorization.split(' ')[1];
+  jwt.verify(token, getKey, {}, function (err, user) {
+    if (err) {
+      res.status(500).send('invalid token');
+    } else {
+      Book.findOne({_id: req.params.id, email: user.email}).then(foundBook => {
+        console.log(foundBook);
+        foundBook.name = req.body.name;
+        foundBook.description = req.body.description;
+        foundBook.save()
+        .then(savedBook => res.send(savedBook));
+      });
+    };
+  });
 });
 
 // Default route to catch any other routes that may be entered
