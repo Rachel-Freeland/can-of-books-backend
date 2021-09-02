@@ -41,7 +41,7 @@ app.get("/books", async (req, res) => {
   if (req.query.email) {
     user.email = req.query.email;
   }
-   console.log(user);
+  console.log(user);
   try {
     const bookList = await Book.find({})
     // res.send(book);
@@ -53,13 +53,47 @@ app.get("/books", async (req, res) => {
   }
 });
 
-app.post("/books", async ( req, res) => {
+app.post("/books", async (req, res) => {
+  // console.log should see the json object that has the new books title, description, status and email.
   console.log(req.body)
-  try{
-   const newBook = await Book.create(req.body);
-   res.status(201).send(newBook);
-  }catch(err) {
+  try {
+    const newBook = await Book.create(req.body);
+    res.status(201).send(newBook);
+    // Book.create is making a new Book instance with the json object we sent down in our request from the front end.
+  } catch (err) {
+    // if we dont get what we want, we send oops information.
     res.status(401).send(err);
+  }
+
+});
+
+app.delete("/books/:id", async (req, res) => {
+  // console.log should see the specific book selected in app's personalized ID that it was given upon creation in the DB.
+  console.log(req.params.id)
+  try {
+    await Book.findByIdAndDelete(req.params.id);
+    // We are looking for a book in all of the Book schema objects that were created and finding the specific book's id.  then it is deleted from the database because thats what the findByIdAndDelete method is programed to do.
+    res.status(204).send('book deleted!');
+  } catch (err) {
+        // if we dont get what we want, we send oops information.
+    res.status(404).send(err);
+  }
+
+});
+
+app.put("/books/:id", async (req, res) => {
+   // console.log should see the specific book selected in app's personalized ID that it was given upon creation in the DB.
+  console.log(req.params.id)
+  // we are setting a local(in fuction only) variable called ID, that is given the value of the personalized ID sent from the front end... so that we may use it easier(aka less typing/readability) in our updateBook variable.
+  const id = req.params.id;
+  try {
+    const updateBook = await Book.findByIdAndUpdate(id, req.body, {new: true});
+    // findByIdAndUpdate is taking the unique ID and taking the req.body{like when we make a new book}, then is changing the old version of the book into the new version the user is requesting to make.
+    res.status(204).send(updateBook);
+  } catch (err) {
+    console.log(err);
+        // if we dont get what we want, we send oops information.
+    res.status(404).send(`not able to update book:${req.params.id}`);
   }
 
 });
@@ -68,12 +102,6 @@ app.post("/books", async ( req, res) => {
 app.get("/*", (req, res) => {
   res.status(404).send("This is not the route you are looking for!");
 });
-
-//-------------------Functions and Classes-----------------
-
-//------------------------Seeding DB-----------------------
-
-// createBook();
 
 //------------------------Listening------------------------
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
