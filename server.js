@@ -107,7 +107,7 @@ app.put("/books/:id", async (req, res) => {
     } else {
       Book.findOne({_id: req.params.id, email: user.email}).then(foundBook => {
         console.log(foundBook);
-        foundBook.name = req.body.name;
+        foundBook.title = req.body.title;
         foundBook.description = req.body.description;
         foundBook.save()
         .then(savedBook => res.send(savedBook));
