@@ -6,7 +6,7 @@ const cors = require("cors");
 
 // getting-started.js
 const mongoose = require("mongoose");
-mongoose.connect("mongodb://localhost:27017/test");
+mongoose.connect("mongodb+srv://admin:SCRAM@canofbooks.dyuys.mongodb.net/canOfBooks?retryWrites=true&w=majority");
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error: "));
@@ -71,7 +71,7 @@ app.post("/books", async (req, res) => {
       res.status(500).send(err);
     } else {
       const newBook = new Book({
-        name: req.body.name,
+        title: req.body.title,
         description: req.body.description,
         status: req.body.status,
         email: user.email
@@ -107,7 +107,7 @@ app.put("/books/:id", async (req, res) => {
     } else {
       Book.findOne({_id: req.params.id, email: user.email}).then(foundBook => {
         console.log(foundBook);
-        foundBook.name = req.body.name;
+        foundBook.title = req.body.title;
         foundBook.description = req.body.description;
         foundBook.save()
         .then(savedBook => res.send(savedBook));
