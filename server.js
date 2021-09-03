@@ -71,7 +71,7 @@ app.post("/books", async (req, res) => {
       res.status(500).send(err);
     } else {
       const newBook = new Book({
-        name: req.body.name,
+        title: req.body.title,
         description: req.body.description,
         status: req.body.status,
         email: user.email
